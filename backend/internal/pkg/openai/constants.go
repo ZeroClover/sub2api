@@ -16,6 +16,7 @@ type Model struct {
 // DefaultModels OpenAI models list
 var DefaultModels = []Model{
 	{ID: "gpt-5.3", Object: "model", Created: 1735689600, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.3"},
+	{ID: "gpt-5.3-codex-spark", Object: "model", Created: 1739404800, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.3 Codex Spark"},
 	{ID: "gpt-5.3-codex", Object: "model", Created: 1735689600, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.3 Codex"},
 	{ID: "gpt-5.2", Object: "model", Created: 1733875200, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.2"},
 	{ID: "gpt-5.2-codex", Object: "model", Created: 1733011200, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.2 Codex"},
@@ -37,6 +38,16 @@ func DefaultModelIDs() []string {
 
 // DefaultTestModel default model for testing OpenAI accounts
 const DefaultTestModel = "gpt-5.1-codex"
+
+// ProOnlyModels 仅 ChatGPT Pro 订阅可用的模型
+var ProOnlyModels = map[string]bool{
+	"gpt-5.3-codex-spark": true,
+}
+
+// IsProOnlyModel 检查模型是否仅限 Pro 订阅
+func IsProOnlyModel(model string) bool {
+	return ProOnlyModels[model]
+}
 
 // DefaultInstructions default instructions for non-Codex CLI requests
 // Content loaded from instructions.txt at compile time

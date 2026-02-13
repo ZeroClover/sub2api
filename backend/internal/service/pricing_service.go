@@ -665,6 +665,12 @@ func (s *PricingService) matchOpenAIModel(model string) *LiteLLMModelPricing {
 		}
 	}
 
+	if strings.HasPrefix(model, "gpt-5.3-codex-spark") {
+		if pricing, ok := s.pricingData["gpt-5.3-codex"]; ok {
+			log.Printf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.3-codex")
+			return pricing
+		}
+	}
 	if strings.HasPrefix(model, "gpt-5.3-codex") {
 		if pricing, ok := s.pricingData["gpt-5.2-codex"]; ok {
 			log.Printf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.2-codex")

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/domain"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
 )
 
 type Account struct {
@@ -384,7 +385,13 @@ func (a *Account) GetModelMapping() map[string]string {
 
 // IsModelSupported 检查模型是否在 model_mapping 中（支持通配符）
 // 如果未配置 mapping，返回 true（允许所有模型）
+// Pro-only 模型会额外检查账号的 chatgpt_plan_type
 func (a *Account) IsModelSupported(requestedModel string) bool {
+	// Pro-only 模型检查：仅 OpenAI OAuth Pro 账号可用
+	if openai.IsProOnlyModel(requestedModel) && !a.IsOpenAIProAccount() {
+		return false
+	}
+
 	mapping := a.GetModelMapping()
 	if len(mapping) == 0 {
 		return true // 无映射 = 允许所有
@@ -400,6 +407,15 @@ func (a *Account) IsModelSupported(requestedModel string) bool {
 		}
 	}
 	return false
+}
+
+// IsOpenAIProAccount 检查是否为 OpenAI ChatGPT Pro 订阅账号
+func (a *Account) IsOpenAIProAccount() bool {
+	if !a.IsOpenAIOAuth() {
+		return false
+	}
+	planType := strings.ToLower(a.GetCredential("chatgpt_plan_type"))
+	return strings.Contains(planType, "pro")
 }
 
 // GetMappedModel 获取映射后的模型名（支持通配符，最长优先匹配）
