@@ -664,6 +664,13 @@ func (a *Account) GetOpenAIOrganizationID() string {
 	return a.GetCredential("organization_id")
 }
 
+func (a *Account) GetChatGPTPlanType() string {
+	if !a.IsOpenAIOAuth() {
+		return ""
+	}
+	return a.GetCredential("chatgpt_plan_type")
+}
+
 func (a *Account) GetOpenAITokenExpiresAt() *time.Time {
 	if !a.IsOpenAIOAuth() {
 		return nil

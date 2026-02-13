@@ -232,10 +232,13 @@ type IDTokenClaims struct {
 
 // OpenAIAuthClaims represents the OpenAI specific auth claims
 type OpenAIAuthClaims struct {
-	ChatGPTAccountID string              `json:"chatgpt_account_id"`
-	ChatGPTUserID    string              `json:"chatgpt_user_id"`
-	UserID           string              `json:"user_id"`
-	Organizations    []OrganizationClaim `json:"organizations"`
+	ChatGPTAccountID               string              `json:"chatgpt_account_id"`
+	ChatGPTUserID                  string              `json:"chatgpt_user_id"`
+	ChatGPTPlanType                string              `json:"chatgpt_plan_type"`
+	ChatGPTSubscriptionActiveStart any                 `json:"chatgpt_subscription_active_start"`
+	ChatGPTSubscriptionActiveUntil any                 `json:"chatgpt_subscription_active_until"`
+	UserID                         string              `json:"user_id"`
+	Organizations                  []OrganizationClaim `json:"organizations"`
 }
 
 // OrganizationClaim represents an organization in the ID Token
@@ -332,6 +335,7 @@ type UserInfo struct {
 	Email            string
 	ChatGPTAccountID string
 	ChatGPTUserID    string
+	ChatGPTPlanType  string
 	UserID           string
 	OrganizationID   string
 	Organizations    []OrganizationClaim
@@ -346,6 +350,7 @@ func (c *IDTokenClaims) GetUserInfo() *UserInfo {
 	if c.OpenAIAuth != nil {
 		info.ChatGPTAccountID = c.OpenAIAuth.ChatGPTAccountID
 		info.ChatGPTUserID = c.OpenAIAuth.ChatGPTUserID
+		info.ChatGPTPlanType = c.OpenAIAuth.ChatGPTPlanType
 		info.UserID = c.OpenAIAuth.UserID
 		info.Organizations = c.OpenAIAuth.Organizations
 

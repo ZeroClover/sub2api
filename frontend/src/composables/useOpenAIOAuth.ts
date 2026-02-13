@@ -15,6 +15,7 @@ export interface OpenAITokenInfo {
   // OpenAI specific IDs (extracted from ID Token)
   chatgpt_account_id?: string
   chatgpt_user_id?: string
+  chatgpt_plan_type?: string
   organization_id?: string
   [key: string]: unknown
 }
@@ -152,6 +153,9 @@ export function useOpenAIOAuth() {
     if (tokenInfo.organization_id) {
       creds.organization_id = tokenInfo.organization_id
     }
+    if (tokenInfo.chatgpt_plan_type) {
+      creds.chatgpt_plan_type = tokenInfo.chatgpt_plan_type
+    }
 
     return creds
   }
@@ -160,10 +164,13 @@ export function useOpenAIOAuth() {
   const buildExtraInfo = (tokenInfo: OpenAITokenInfo): Record<string, string> | undefined => {
     const extra: Record<string, string> = {}
     if (tokenInfo.email) {
-      extra.email = tokenInfo.email
+      extra.email_address = tokenInfo.email
     }
     if (tokenInfo.name) {
       extra.name = tokenInfo.name
+    }
+    if (tokenInfo.chatgpt_plan_type) {
+      extra.chatgpt_plan_type = tokenInfo.chatgpt_plan_type
     }
     return Object.keys(extra).length > 0 ? extra : undefined
   }

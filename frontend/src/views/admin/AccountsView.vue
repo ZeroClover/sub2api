@@ -144,11 +144,23 @@
             <div class="flex flex-col">
               <span class="font-medium text-gray-900 dark:text-white">{{ value }}</span>
               <span
-                v-if="row.extra?.email_address"
+                v-if="row.extra?.email_address || row.extra?.email"
                 class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]"
-                :title="row.extra.email_address"
+                :title="row.extra?.email_address || row.extra?.email"
               >
-                {{ row.extra.email_address }}
+                {{ row.extra?.email_address || row.extra?.email }}
+              </span>
+              <span
+                v-if="row.platform === 'openai' && row.type === 'oauth' && row.credentials?.chatgpt_plan_type"
+                class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 w-fit"
+              >
+                {{ row.credentials.chatgpt_plan_type }}
+              </span>
+              <span
+                v-if="(row.platform === 'gemini' || row.platform === 'antigravity') && row.credentials?.tier_id"
+                class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400 w-fit"
+              >
+                {{ row.credentials.tier_id }}
               </span>
             </div>
           </template>

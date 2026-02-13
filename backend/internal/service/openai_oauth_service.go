@@ -106,6 +106,7 @@ type OpenAITokenInfo struct {
 	Email            string `json:"email,omitempty"`
 	ChatGPTAccountID string `json:"chatgpt_account_id,omitempty"`
 	ChatGPTUserID    string `json:"chatgpt_user_id,omitempty"`
+	ChatGPTPlanType  string `json:"chatgpt_plan_type,omitempty"`
 	OrganizationID   string `json:"organization_id,omitempty"`
 }
 
@@ -165,6 +166,7 @@ func (s *OpenAIOAuthService) ExchangeCode(ctx context.Context, input *OpenAIExch
 		tokenInfo.Email = userInfo.Email
 		tokenInfo.ChatGPTAccountID = userInfo.ChatGPTAccountID
 		tokenInfo.ChatGPTUserID = userInfo.ChatGPTUserID
+		tokenInfo.ChatGPTPlanType = userInfo.ChatGPTPlanType
 		tokenInfo.OrganizationID = userInfo.OrganizationID
 	}
 
@@ -199,6 +201,7 @@ func (s *OpenAIOAuthService) RefreshToken(ctx context.Context, refreshToken stri
 		tokenInfo.Email = userInfo.Email
 		tokenInfo.ChatGPTAccountID = userInfo.ChatGPTAccountID
 		tokenInfo.ChatGPTUserID = userInfo.ChatGPTUserID
+		tokenInfo.ChatGPTPlanType = userInfo.ChatGPTPlanType
 		tokenInfo.OrganizationID = userInfo.OrganizationID
 	}
 
@@ -251,6 +254,9 @@ func (s *OpenAIOAuthService) BuildAccountCredentials(tokenInfo *OpenAITokenInfo)
 	}
 	if tokenInfo.OrganizationID != "" {
 		creds["organization_id"] = tokenInfo.OrganizationID
+	}
+	if tokenInfo.ChatGPTPlanType != "" {
+		creds["chatgpt_plan_type"] = tokenInfo.ChatGPTPlanType
 	}
 
 	return creds
