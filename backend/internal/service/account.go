@@ -387,26 +387,42 @@ func (a *Account) GetModelMapping() map[string]string {
 // 如果未配置 mapping，返回 true（允许所有模型）
 // Pro-only 模型会额外检查账号的 chatgpt_plan_type
 func (a *Account) IsModelSupported(requestedModel string) bool {
-	// Pro-only 模型检查：仅 OpenAI OAuth Pro 账号可用
-	if openai.IsProOnlyModel(requestedModel) && !a.IsOpenAIProAccount() {
+	mapping := a.GetModelMapping()
+	mappedModel := requestedModel
+	supported := true
+
+	if len(mapping) > 0 {
+		supported = false
+		// 精确匹配
+		if mapped, exists := mapping[requestedModel]; exists {
+			supported = true
+			mappedModel = mapped
+		} else {
+			// 通配符匹配
+			for pattern := range mapping {
+				if matchWildcard(pattern, requestedModel) {
+					supported = true
+					break
+				}
+			}
+			if supported {
+				mappedModel = matchWildcardMapping(mapping, requestedModel)
+			}
+		}
+	}
+
+	if !supported {
 		return false
 	}
 
-	mapping := a.GetModelMapping()
-	if len(mapping) == 0 {
-		return true // 无映射 = 允许所有
+	// Pro-only 模型检查：
+	// 1) requestedModel 本身是 Pro-only
+	// 2) requestedModel 经过映射后落到 Pro-only
+	if (openai.IsProOnlyModel(requestedModel) || openai.IsProOnlyModel(mappedModel)) && !a.IsOpenAIProAccount() {
+		return false
 	}
-	// 精确匹配
-	if _, exists := mapping[requestedModel]; exists {
-		return true
-	}
-	// 通配符匹配
-	for pattern := range mapping {
-		if matchWildcard(pattern, requestedModel) {
-			return true
-		}
-	}
-	return false
+
+	return true
 }
 
 // IsOpenAIProAccount 检查是否为 OpenAI ChatGPT Pro 订阅账号

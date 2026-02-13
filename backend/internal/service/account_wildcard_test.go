@@ -202,6 +202,102 @@ func TestAccountIsModelSupported(t *testing.T) {
 	}
 }
 
+func TestAccountIsModelSupported_ProOnlyModels(t *testing.T) {
+	tests := []struct {
+		name           string
+		account        *Account
+		requestedModel string
+		expected       bool
+	}{
+		{
+			name: "non-pro openai oauth cannot use spark exact model",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+			},
+			requestedModel: "gpt-5.3-codex-spark",
+			expected:       false,
+		},
+		{
+			name: "non-pro openai oauth cannot use spark variant model",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+			},
+			requestedModel: "gpt-5.3-codex-spark-high",
+			expected:       false,
+		},
+		{
+			name: "non-pro openai oauth cannot use codex-spark alias",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+			},
+			requestedModel: "codex-spark",
+			expected:       false,
+		},
+		{
+			name: "non-pro openai oauth cannot bypass via model mapping to spark",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+				Credentials: map[string]any{
+					"model_mapping": map[string]any{
+						"gpt-5": "gpt-5.3-codex-spark",
+					},
+				},
+			},
+			requestedModel: "gpt-5",
+			expected:       false,
+		},
+		{
+			name: "pro openai oauth can use spark exact model",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+				Credentials: map[string]any{
+					"chatgpt_plan_type": "chatgptpro",
+				},
+			},
+			requestedModel: "gpt-5.3-codex-spark",
+			expected:       true,
+		},
+		{
+			name: "pro openai oauth can use mapping to spark",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeOAuth,
+				Credentials: map[string]any{
+					"chatgpt_plan_type": "pro",
+					"model_mapping": map[string]any{
+						"gpt-5": "gpt-5.3-codex-spark",
+					},
+				},
+			},
+			requestedModel: "gpt-5",
+			expected:       true,
+		},
+		{
+			name: "openai api key cannot use spark model",
+			account: &Account{
+				Platform: PlatformOpenAI,
+				Type:     AccountTypeAPIKey,
+			},
+			requestedModel: "gpt-5.3-codex-spark",
+			expected:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.account.IsModelSupported(tt.requestedModel)
+			if got != tt.expected {
+				t.Errorf("IsModelSupported(%q) = %v, want %v", tt.requestedModel, got, tt.expected)
+			}
+		})
+	}
+}
+
 func TestAccountGetMappedModel(t *testing.T) {
 	tests := []struct {
 		name           string

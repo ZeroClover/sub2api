@@ -1,7 +1,10 @@
 // Package openai provides helpers and types for OpenAI API integration.
 package openai
 
-import _ "embed"
+import (
+	_ "embed"
+	"strings"
+)
 
 // Model represents an OpenAI model
 type Model struct {
@@ -46,7 +49,33 @@ var ProOnlyModels = map[string]bool{
 
 // IsProOnlyModel 检查模型是否仅限 Pro 订阅
 func IsProOnlyModel(model string) bool {
-	return ProOnlyModels[model]
+	normalized := normalizeProOnlyModel(model)
+	if normalized == "" {
+		return false
+	}
+	if ProOnlyModels[normalized] {
+		return true
+	}
+	for proModel := range ProOnlyModels {
+		if strings.HasPrefix(normalized, proModel+"-") {
+			return true
+		}
+	}
+	// Codex CLI 场景常见别名（如 codex-spark / codex-spark-high）。
+	return normalized == "codex-spark" || strings.HasPrefix(normalized, "codex-spark-")
+}
+
+func normalizeProOnlyModel(model string) string {
+	normalized := strings.TrimSpace(strings.ToLower(model))
+	if normalized == "" {
+		return ""
+	}
+	if strings.Contains(normalized, "/") {
+		parts := strings.Split(normalized, "/")
+		normalized = parts[len(parts)-1]
+	}
+	normalized = strings.ReplaceAll(normalized, " ", "-")
+	return normalized
 }
 
 // DefaultInstructions default instructions for non-Codex CLI requests
